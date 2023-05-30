@@ -337,11 +337,6 @@ export default function Register() {
                 {childEmailError}
               </Typography>
             )}
-            {!validateEmail(childEmail) && (
-              <Typography variant="body2" color="error">
-                Будь ласка, введіть правильний формат електронної адреси
-              </Typography>
-            )}
             <TextField
               required
               fullWidth
