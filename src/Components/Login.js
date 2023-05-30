@@ -12,6 +12,9 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { AuthContext, AuthProvider } from './AuthContext';
+import { useState, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 function Copyright(props) {
   return (
@@ -23,17 +26,44 @@ function Copyright(props) {
   );
 }
 
+
 const theme = createTheme();
 
 export default function Login() {
+  const { login, authenticatedUser, setAuthenticatedUser } = useContext(AuthContext);
+  const navigate = useNavigate();
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    fetch('https://646a874d7d3c1cae4ce2a2cd.mockapi.io/Users')
+      .then((response) => response.json())
+      .then((data) => {
+        const user = data.find((user) => user.username === username && user.password === password);
+        if (user) {
+        login(user.type === "parent");
+        setAuthenticatedUser(user);
+        localStorage.setItem('authenticatedUser', JSON.stringify(user));
+        navigate('/Tasks');
+      } else {
+        console.log('Неправильні облікові дані');
+      }
+    })
+      .catch((error) => console.error('Помилка при отриманні даних:', error));
+  };
   
   return (
+    <div style={{
+      backgroundImage: `url(${require('./image7.png')})`,
+      backgroundSize: 'cover',
+      minHeight: '100vh',}}>
     <ThemeProvider theme={theme}>
       <Container component="main" maxWidth="xs">
         <CssBaseline />
         <Box
           sx={{
-            marginTop: 8,
+            marginTop: 0,
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
@@ -50,11 +80,13 @@ export default function Login() {
               margin="normal"
               required
               fullWidth
-              id="email"
-              label="Email Address"
-              name="email"
-              autoComplete="email"
+              id="Username"
+              label="Username"
+              name="Username"
+              autoComplete="Username"
               autoFocus
+              value={username}
+              onChange={(event) => setUsername(event.target.value)}
             />
             <TextField
               margin="normal"
@@ -65,6 +97,8 @@ export default function Login() {
               type="password"
               id="password"
               autoComplete="current-password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
             />
             <FormControlLabel
               control={<Checkbox value="remember" color="primary" />}
@@ -75,6 +109,7 @@ export default function Login() {
               fullWidth
               variant="contained"
               sx={{ mt: 3, mb: 2 }}
+              onClick={handleSubmit}
             >
               Sign In
             </Button>
@@ -95,5 +130,6 @@ export default function Login() {
         <Copyright sx={{ mt: 8, mb: 4 }} />
       </Container>
     </ThemeProvider>
+    </div>
   );
 }
