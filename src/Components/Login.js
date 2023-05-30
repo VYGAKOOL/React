@@ -34,6 +34,7 @@ export default function Login() {
   const navigate = useNavigate();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [isInvalidCredentials, setIsInvalidCredentials] = useState(false);
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -47,7 +48,7 @@ export default function Login() {
         localStorage.setItem('authenticatedUser', JSON.stringify(user));
         navigate('/Tasks');
       } else {
-        console.log('Неправильні облікові дані');
+        setIsInvalidCredentials(true);
       }
     })
       .catch((error) => console.error('Помилка при отриманні даних:', error));
@@ -104,6 +105,11 @@ export default function Login() {
               control={<Checkbox value="remember" color="primary" />}
               label="Remember me"
             />
+                {isInvalidCredentials && (
+        <Typography variant="body2" color="error" align="center">
+          Incorrect username or password
+        </Typography>
+      )}
             <Button
               type="submit"
               fullWidth

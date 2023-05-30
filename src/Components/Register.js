@@ -44,10 +44,83 @@ export default function Register() {
   const navigate = useNavigate();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const { login } = useContext(AuthContext);
+  const { registerUser } = useContext(AuthContext);
+  const [parentUsernameError, setParentUsernameError] = useState('');
+  const [parentEmailError, setParentEmailError] = useState('');
+  const [parentPasswordError, setParentPasswordError] = useState('');
+  const [childUsernameError, setChildUsernameError] = useState('');
+  const [childEmailError, setChildEmailError] = useState('');
+  const [childPasswordError, setChildPasswordError] = useState('');
+  const [ExistUserError, setExistUserError] = useState('');
+
+  const validateEmail = (email) => {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
+  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-  
+
+    let isValid = true;
+
+     if (parentUsername === '') {
+      setParentUsernameError('Будь ласка, введіть батьківський нікнейм');
+      isValid = false;
+    } else {
+      setParentUsernameError('');
+    }
+
+    if (parentEmail === '') {
+      setParentEmailError('Будь ласка, введіть електронну адресу батьків');
+      isValid = false;
+    } else if (!validateEmail(parentEmail)) {
+      setParentEmailError('Будь ласка, введіть правильний формат електронної адреси');
+      isValid = false;
+    } else {
+      setParentEmailError('');
+    }
+
+    if (parentPassword === '') {
+      setParentPasswordError('Будь ласка, введіть пароль батьків');
+      isValid = false;
+    } else {
+      setParentPasswordError('');
+    }
+
+    if (childUsername === '') {
+      setChildUsernameError('Будь ласка, введіть дитячий нікнейм');
+      isValid = false;
+    } else {
+      setChildUsernameError('');
+    }
+
+    if (childEmail === '') {
+      setChildEmailError('Будь ласка, введіть електронну адресу дитини');
+      isValid = false;
+    } else if (!validateEmail(childEmail)) {
+      setChildEmailError('Будь ласка, введіть правильний формат електронної адреси');
+      isValid = false;
+    } else {
+      setChildEmailError('');
+    }
+
+    if (childPassword === '') {
+      setChildPasswordError('Будь ласка, введіть пароль дитини');
+      isValid = false;
+    } else {
+      setChildPasswordError('');
+    }
+
+    const usersResponse = await fetch('https://646a874d7d3c1cae4ce2a2cd.mockapi.io/Users');
+    const usersData = await usersResponse.json();
+    const existingUser = usersData.find((user) => user.username === parentUsername);
+    if (existingUser) {
+      setExistUserError('Користувач з таким нікнеймом вже існує');
+    } else {
+      setExistUserError('');
+    }
+
+    if (isValid) {
     const Identificationid = generateIdentificationid();
 
     const parentData = {
@@ -90,7 +163,7 @@ export default function Register() {
       const childUserData = await childResponse.json();
       console.log('Дані дитини успішно збережені:', childUserData);
   
-      navigate('/Shop');
+      navigate('/Tasks');
     } catch (error) {
       console.error('Помилка при збереженні даних:', error);
     }
@@ -135,6 +208,7 @@ export default function Register() {
         console.error('Помилка при збереженні даних дитини:', error);
       });
   };
+  }
 
   return (
     <div style={{
@@ -176,6 +250,16 @@ export default function Register() {
               onChange={(event) => setParentUsername(event.target.value)}
               sx={{ mt: 1, width: '100%' }}
             />
+            {parentUsernameError && (
+              <Typography variant="body2" color="error">
+                {parentUsernameError}
+              </Typography>
+            )}
+            {parentUsername === 'existingUsername' && (
+              <Typography variant="body2" color="error">
+                Користувач з таким нікнеймом вже існує
+              </Typography>
+            )}
             <TextField
               required
               fullWidth
@@ -187,6 +271,11 @@ export default function Register() {
               onChange={(event) => setParentEmail(event.target.value)}
               sx={{ mt: 1, width: '100%' }}
             />
+            {parentEmailError && (
+              <Typography variant="body2" color="error">
+                {parentEmailError}
+              </Typography>
+            )}
             <TextField
               required
               fullWidth
@@ -199,6 +288,11 @@ export default function Register() {
               onChange={(event) => setParentPassword(event.target.value)}
               sx={{ mt: 1, width: '100%' }}
             />
+            {parentPasswordError && (
+              <Typography variant="body2" color="error">
+                {parentPasswordError}
+              </Typography>
+            )}
               </form>
             </Grid>
             <Grid item xs={6} >
@@ -217,6 +311,16 @@ export default function Register() {
               onChange={(event) => setChildUsername(event.target.value)}
               sx={{ mt: 1, width: '100%' }}
             />
+            {childUsernameError && (
+               <Typography variant="body2" color="error">
+                 {childUsernameError}
+               </Typography>
+             )}
+             {childUsername === 'existingUsername' && (
+               <Typography variant="body2" color="error">
+                 Користувач з таким нікнеймом вже існує
+               </Typography>
+             )}
             <TextField
               required
               fullWidth
@@ -228,6 +332,16 @@ export default function Register() {
               onChange={(event) => setChildEmail(event.target.value)}
               sx={{ mt: 1, width: '100%' }}
             />
+            {childEmailError && (
+              <Typography variant="body2" color="error">
+                {childEmailError}
+              </Typography>
+            )}
+            {!validateEmail(childEmail) && (
+              <Typography variant="body2" color="error">
+                Будь ласка, введіть правильний формат електронної адреси
+              </Typography>
+            )}
             <TextField
               required
               fullWidth
@@ -240,6 +354,11 @@ export default function Register() {
               onChange={(event) => setChildPassword(event.target.value)}
               sx={{ mt: 1, width: '100%' }}
             />
+            {childPasswordError && (
+              <Typography variant="body2" color="error">
+                {childPasswordError}
+              </Typography>
+            )}
               </form>
             </Grid>
           </Grid>
@@ -252,6 +371,11 @@ export default function Register() {
                 >
                   Sign Up
                 </Button>
+            {ExistUserError && (
+              <Typography variant="body2" color="error">
+                {ExistUserError}
+              </Typography>
+            )}      
           <Grid container justifyContent="flex-end">
             <Grid item>
               <Link href="Login" variant="body2">
